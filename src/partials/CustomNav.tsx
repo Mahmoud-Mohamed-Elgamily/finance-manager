@@ -8,7 +8,7 @@ const setActiveTab = (
 ): void => {
   setTabs(
     tabs.map((tab: ITab) => {
-      tab.active = tab.eventKey == eventKey ? true : false;
+      tab.active = tab.eventKey === eventKey ? true : false;
       return tab;
     })
   );

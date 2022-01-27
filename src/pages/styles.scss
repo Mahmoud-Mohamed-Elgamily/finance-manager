@@ -1,0 +1,10 @@
+@mixin boxShadow {
+  border-radius: 10px;
+  box-shadow: 0 4px 10px 0 rgb(40 49 53 / 20%);
+}
+
+div.row {
+  align-items: "flex-end";
+  padding: 10px 0;
+  @include boxShadow();
+}
