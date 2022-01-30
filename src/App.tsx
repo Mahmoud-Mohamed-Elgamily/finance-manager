@@ -1,11 +1,12 @@
 import { Container } from "react-bootstrap";
 import "./App.css";
 import Payment from "./pages/Payment";
-import "bootstrap/dist/css/bootstrap.css";
 import CustomNav from "./partials/CustomNav";
 import { useState } from "react";
 import Reports from "./pages/Reports";
 import { ITab } from "./types/tab.type";
+import "bootstrap/dist/css/bootstrap.css";
+import "react-bootstrap-typeahead/css/Typeahead.css";
 
 function App() {
   const [tabs, setTabs] = useState<ITab[]>([

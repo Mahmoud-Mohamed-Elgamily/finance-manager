@@ -1,4 +1,5 @@
 import { useFormik } from "formik";
+import { useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import FormGroup from "../components/FormGroup";
 import { paymentInitialValues } from "../initialValues/payment.initial";
@@ -14,6 +15,15 @@ const Payment = () => {
       Database.insert(values);
     },
   });
+
+  const [types, setTypes] = useState([
+    { label: "fra5", id: 1 },
+    { label: "rice", id: 2 },
+  ]);
+  const [items, setItems] = useState([
+    { label: "fra5", id: 1 },
+    { label: "rice", id: 2 },
+  ]);
   return (
     <Form onSubmit={formik.handleSubmit}>
       <Container>
@@ -22,10 +32,24 @@ const Payment = () => {
             <FormGroup label="Date" name="date" type="date" formik={formik} />
           </Col>
           <Col>
-            <FormGroup label="Type" name="type" type="text" formik={formik} />
+            <FormGroup
+              label="Type"
+              name="type"
+              type="select"
+              options={types}
+              placeholder="select type"
+              formik={formik}
+            />
           </Col>
           <Col>
-            <FormGroup label="Item" name="item" type="text" formik={formik} />
+            <FormGroup
+              label="Item"
+              name="item"
+              type="select"
+              options={items}
+              multiple={true}
+              formik={formik}
+            />
           </Col>
           <Col>
             <FormGroup
