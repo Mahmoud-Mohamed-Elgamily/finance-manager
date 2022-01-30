@@ -1,6 +1,7 @@
 import { IPayment } from "../interfaces/IPayment";
 import { openDB } from "idb";
 import { Option } from "react-bootstrap-typeahead/types/types";
+import { Dispatch, SetStateAction } from "react";
 
 class Database {
   db!: any;
@@ -34,9 +35,13 @@ class Database {
         console.log("Why didn't you allow my web app to use IndexedDB?!")
       );
   }
-  async insert(value: IPayment) {
-    await this.checkForNewTypes(value);
-    await this.checkForNewItems(value);
+  async insert(
+    value: IPayment,
+    setTypes: Dispatch<SetStateAction<Option[]>>,
+    setItems: Dispatch<SetStateAction<Option[]>>
+  ) {
+    await this.checkForNewTypes(value, setTypes);
+    await this.checkForNewItems(value, setItems);
     this.db.add("payments", value);
     console.log(value);
   }
@@ -53,16 +58,23 @@ class Database {
     return types;
   }
 
-  private async checkForNewTypes(value: IPayment) {
+  private async checkForNewTypes(
+    value: IPayment,
+    setTypes: Dispatch<SetStateAction<Option[]>>
+  ) {
     if (value.type[0].customOption) {
       delete value.type[0].customOption;
       value.type[0].id = await this.db.add("types", {
         label: value.type[0].label,
       });
+      setTypes((old) => [...old, value.type[0]]);
     }
   }
 
-  private async checkForNewItems(value: IPayment) {
+  private async checkForNewItems(
+    value: IPayment,
+    setItems: Dispatch<SetStateAction<Option[]>>
+  ) {
     await Promise.all(
       value.items.map(async (item) => {
         if (item.customOption) {
@@ -70,6 +82,7 @@ class Database {
           item.id = await this.db.add("items", {
             label: item.label,
           });
+          setItems((old) => [...old, item]);
         }
       })
     );

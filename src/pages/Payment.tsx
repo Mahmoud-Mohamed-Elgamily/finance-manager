@@ -13,7 +13,7 @@ const Payment = () => {
     initialValues: paymentInitialValues,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      await Database.insert(values);
+      await Database.insert(values, setTypes, setItems);
       formik.resetForm();
     },
   });
