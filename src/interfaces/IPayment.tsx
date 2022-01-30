@@ -1,7 +1,7 @@
 export interface IPayment {
   date: string;
   type: any[];
-  item: any[];
+  items: any[];
   count: number;
   price: number;
 }

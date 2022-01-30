@@ -1,64 +1,78 @@
 import { IPayment } from "../interfaces/IPayment";
+import { openDB } from "idb";
+import { Option } from "react-bootstrap-typeahead/types/types";
 
 class Database {
-  db!: IDBDatabase;
+  db!: any;
   constructor() {
-    if (!indexedDB) {
-      console.log(
-        "Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available."
+    openDB("finance", 1, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains("types")) {
+          db.createObjectStore("types", {
+            keyPath: "id",
+            autoIncrement: true,
+          });
+        }
+        if (!db.objectStoreNames.contains("items")) {
+          db.createObjectStore("items", {
+            keyPath: "id",
+            autoIncrement: true,
+          });
+        }
+        if (!db.objectStoreNames.contains("payments")) {
+          db.createObjectStore("payments", {
+            keyPath: "id",
+            autoIncrement: true,
+          });
+        }
+      },
+    })
+      .then((db) => {
+        this.db = db;
+      })
+      .catch((err) =>
+        console.log("Why didn't you allow my web app to use IndexedDB?!")
       );
-      return;
-    }
-    const request = indexedDB.open("finance", 1);
-    request.onerror = function (event) {
-      console.log("Why didn't you allow my web app to use IndexedDB?!");
-    };
-    request.onsuccess = () => {
-      this.db = request.result;
-      this.initStores();
-    };
-    request.onupgradeneeded = () => {
-      let db = request.result;
-      if (!db.objectStoreNames.contains("types")) {
-        db.createObjectStore("types", { keyPath: "id", autoIncrement: true });
-      }
-      if (!db.objectStoreNames.contains("items")) {
-        db.createObjectStore("items", { keyPath: "id", autoIncrement: true });
-      }
-      if (!db.objectStoreNames.contains("payments")) {
-        db.createObjectStore("payments", {
-          keyPath: "id",
-          autoIncrement: true,
-        });
-      }
-    };
   }
-  insert(value: IPayment) {
-    const { types, items, payments } = this.initStores();
-    this.checkForNewTypes(value, types);
-    this.checkForNewItems(value, items);
+  async insert(value: IPayment) {
+    await this.checkForNewTypes(value);
+    await this.checkForNewItems(value);
+    this.db.add("payments", value);
     console.log(value);
   }
-  private checkForNewTypes(value: IPayment, storeObject: IDBObjectStore) {
-    if (value.type[0].customOption)
-      value.type[0] = storeObject.add({
-        label: value.type[0].customOption.label,
-      });
-    console.log(value.type[0]);
+
+  async getItems(): Promise<Option[]> {
+    const db = await openDB("finance", 1);
+    const items = await db.getAll("items");
+    return items;
   }
 
-  private checkForNewItems(value: IPayment, storeObject: IDBObjectStore) {}
+  async getTypes(): Promise<Option[]> {
+    const db = await openDB("finance", 1);
+    const types = await db.getAll("types");
+    return types;
+  }
 
-  private initStores() {
-    let transaction = this.db.transaction(
-      ["types", "items", "payments"],
-      "readwrite"
+  private async checkForNewTypes(value: IPayment) {
+    if (value.type[0].customOption) {
+      delete value.type[0].customOption;
+      value.type[0].id = await this.db.add("types", {
+        label: value.type[0].label,
+      });
+    }
+  }
+
+  private async checkForNewItems(value: IPayment) {
+    await Promise.all(
+      value.items.map(async (item) => {
+        if (item.customOption) {
+          delete item.customOption;
+          item.id = await this.db.add("items", {
+            label: item.label,
+          });
+        }
+      })
     );
-    return {
-      types: transaction.objectStore("types"),
-      items: transaction.objectStore("items"),
-      payments: transaction.objectStore("payments"),
-    };
   }
 }
 

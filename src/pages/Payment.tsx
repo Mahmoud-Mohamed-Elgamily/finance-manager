@@ -1,29 +1,40 @@
 import { useFormik } from "formik";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import FormGroup from "../components/FormGroup";
 import { paymentInitialValues } from "../initialValues/payment.initial";
 import Database from "../logic/database";
 import { validationSchema } from "../validations/payment.validation";
+import { Option } from "react-bootstrap-typeahead/types/types";
 
 import "./styles.scss";
 const Payment = () => {
   const formik = useFormik({
     initialValues: paymentInitialValues,
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      Database.insert(values);
+    onSubmit: async (values) => {
+      await Database.insert(values);
+      formik.resetForm();
     },
   });
 
-  const [types, setTypes] = useState([
-    { label: "fra5", id: 1 },
-    { label: "rice", id: 2 },
-  ]);
-  const [items, setItems] = useState([
-    { label: "fra5", id: 1 },
-    { label: "rice", id: 2 },
-  ]);
+  const [types, setTypes] = useState<Option[]>([]);
+  const [items, setItems] = useState<Option[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      console.log("fetching");
+
+      try {
+        setTypes(await Database.getTypes());
+        setItems(await Database.getItems());
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <Form onSubmit={formik.handleSubmit}>
       <Container>
@@ -43,8 +54,8 @@ const Payment = () => {
           </Col>
           <Col>
             <FormGroup
-              label="Item"
-              name="item"
+              label="Items"
+              name="items"
               type="select"
               options={items}
               multiple={true}
@@ -61,7 +72,7 @@ const Payment = () => {
           </Col>
           <Col>
             <FormGroup
-              label="Price"
+              label="Item Price"
               name="price"
               type="number"
               formik={formik}
