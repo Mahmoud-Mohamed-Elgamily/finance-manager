@@ -1,4 +1,24 @@
+
+@mixin boxShadow {
+  border-radius: 10px;
+  box-shadow: 0 4px 10px 0 rgb(40 49 53 / 20%);
+}
+
 .rbt-token .rbt-token-remove-button {
   background: transparent;
   border: none;
+}
+
+div.row {
+  align-items: "flex-end";
+  padding: 10px 0;
+  @include boxShadow();
+}
+
+div.table-responsive {
+  @include boxShadow();
+}
+
+span.badge {
+  font-size: 1em;
 }

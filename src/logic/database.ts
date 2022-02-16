@@ -43,7 +43,6 @@ class Database {
     await this.checkForNewTypes(value, setTypes);
     await this.checkForNewItems(value, setItems);
     this.db.add("payments", value);
-    console.log(value);
   }
 
   async getItems(): Promise<Option[]> {
@@ -56,6 +55,23 @@ class Database {
     const db = await openDB("finance", 1);
     const types = await db.getAll("types");
     return types;
+  }
+
+  async getPayments(): Promise<IPayment[]> {
+    let firstDay = this.getFirstDay();
+    const db = await openDB("finance", 1);
+    const payments = await await db.getAll("payments");
+    return payments
+      .filter((payment) => new Date(payment.date) >= firstDay)
+      .sort((a, b) => new Date(b.date).getDate() - new Date(a.date).getDate());
+  }
+
+  private getFirstDay() {
+    let date = new Date(),
+      y = date.getFullYear(),
+      m = date.getMonth();
+    let firstDay = new Date(y, m, 1);
+    return firstDay;
   }
 
   private async checkForNewTypes(

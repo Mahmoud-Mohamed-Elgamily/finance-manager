@@ -1,91 +1,15 @@
-import { useFormik } from "formik";
-import { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import FormGroup from "../components/FormGroup";
-import { paymentInitialValues } from "../initialValues/payment.initial";
-import Database from "../logic/database";
-import { validationSchema } from "../validations/payment.validation";
-import { Option } from "react-bootstrap-typeahead/types/types";
+import { useState } from "react";
+import NewPayment from "../components/NewPayment";
+import PaymentsList from "../components/PaymentsList";
+import { IPayment } from "../interfaces/IPayment";
 
-import "./styles.scss";
 const Payment = () => {
-  const formik = useFormik({
-    initialValues: paymentInitialValues,
-    validationSchema: validationSchema,
-    onSubmit: async (values) => {
-      await Database.insert(values, setTypes, setItems);
-      formik.resetForm();
-    },
-  });
-
-  const [types, setTypes] = useState<Option[]>([]);
-  const [items, setItems] = useState<Option[]>([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      console.log("fetching");
-
-      try {
-        setTypes(await Database.getTypes());
-        setItems(await Database.getItems());
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-  }, []);
-
+  const [payments, setPayments] = useState<IPayment[]>([]);
   return (
-    <Form onSubmit={formik.handleSubmit}>
-      <Container>
-        <Row style={{ alignItems: "center" }}>
-          <Col>
-            <FormGroup label="Date" name="date" type="date" formik={formik} />
-          </Col>
-          <Col>
-            <FormGroup
-              label="Type"
-              name="type"
-              type="select"
-              options={types}
-              placeholder="select type"
-              formik={formik}
-            />
-          </Col>
-          <Col>
-            <FormGroup
-              label="Items"
-              name="items"
-              type="select"
-              options={items}
-              multiple={true}
-              formik={formik}
-            />
-          </Col>
-          <Col>
-            <FormGroup
-              label="Count"
-              name="count"
-              type="number"
-              formik={formik}
-            />
-          </Col>
-          <Col>
-            <FormGroup
-              label="Item Price"
-              name="price"
-              type="number"
-              formik={formik}
-            />
-          </Col>
-          <Col>
-            <Button variant="primary" type="submit">
-              Submit
-            </Button>
-          </Col>
-        </Row>
-      </Container>
-    </Form>
+    <>
+      <NewPayment payments={payments} setPayments={setPayments}/>
+      <PaymentsList payments={payments} setPayments={setPayments}/>
+    </>
   );
 };
 
